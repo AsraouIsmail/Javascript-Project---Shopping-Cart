@@ -12,6 +12,8 @@ const productsDom = document.querySelector('.products-center');
 
 let cart = [];
 
+let buttonsDom = [];
+
 //getting the products
 class Products {
     async getProducts(){
@@ -61,10 +63,56 @@ class UI{
         productsDom.innerHTML = result;
     }
 
+    getBugButtons(){
+        const buttons = [...document.querySelectorAll('.bag-btn')];
+        buttonsDom = buttons;
+        buttons.forEach(button =>{
+            let id = button.dataset.id;
+            let inCart = cart.find(item => item.id === id);
+            if (inCart) {
+                button.innerText = 'In Cart';
+                button.disabled = true;
+                
+            } else{
+                button.addEventListener('click', (event)=>{
+                    event.target.innerText = 'In Cart';
+                    event.target.disabled = true;
+
+                    //get product from products
+
+                let cartItem = {...Storage.getProduct(id), amount:1 };
+                 //add product to the cart
+
+                cart = [...cart, cartItem];
+                   
+                    //save cart in local storage
+                    Storage.saveCart(cart);
+                    //set cart values
+                    //display cart items
+                    //show the cart
+
+                });
+            }
+        })
+    }
+
 }
 
 //local Storage
 class Storage{
+    static saveProducts(products){
+        localStorage.setItem('products', JSON.stringify(products));
+    }
+
+    static getProduct(id){
+        let products = JSON.parse(localStorage.getItem('products'));
+
+        return products.find(product => product.id === id);
+    }
+
+    static saveCart(){
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
 
 }
 
@@ -73,5 +121,13 @@ document.addEventListener("DOMContentLoaded", () =>{
     const products = new Products();
 
     //get all products
-    products.getProducts().then(Products => ui.displayProducts(Products));
+    products.getProducts().then(Products => {
+    ui.displayProducts(Products)
+    Storage.saveProducts(Products);
+})
+.then(() =>{
+    ui.getBugButtons();
+
+});
+    
 });
