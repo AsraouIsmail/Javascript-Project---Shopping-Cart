@@ -88,12 +88,78 @@ class UI{
                     //save cart in local storage
                     Storage.saveCart(cart);
                     //set cart values
+                    this.setCartValues(cart);
                     //display cart items
+                    this.addCartItem(cartItem);
                     //show the cart
+                    this.showCart();
 
                 });
             }
         })
+    }
+
+    setCartValues(cart){
+        let tempTotal = 0;
+        let itemsTotal = 0;
+        cart.map( item =>{
+            tempTotal += item.price * item.amount;
+            itemsTotal += item.amount;
+        })
+        cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
+        cartItems.innerText = itemsTotal;
+    }
+
+    //display cart items
+
+    addCartItem(item){
+       const div = document.createElement('div');
+       div.classList.add('.cart-item');
+       div.innerHTML = `<!-- cart item -->
+            <!-- item image -->
+            <img src=${item.image} alt="product" />
+            <!-- item info -->
+            <div>
+              <h4>${item.title}</h4>
+              <h5>$${item.price}</h5>
+              <span class="remove-item" data-id=${item.id}>remove</span>
+            </div>
+            <!-- item functionality -->
+            <div>
+                <i class="fas fa-chevron-up" data-id=${item.id}></i>
+              <p class="item-amount">
+                ${item.amount}
+              </p>
+                <i class="fas fa-chevron-down" data-id=${item.id}></i>
+            </div>
+          <!-- cart item -->
+       `;
+       cartContent.append(div);
+
+    }
+
+    showCart(){
+        cartOverlay.classList.add('transparentBcg');
+        cartDom.classList.add('show-cart');
+
+    }
+
+    setupApp(){
+        cart = Storage.getCart();
+        this.setCartValues(cart);
+        this.populateCart(cart);
+        cartBtn.addEventListener('click', this.showCart);
+        CloseCartBtn.addEventListener('click', this.hideCart);
+    }
+
+    populateCart(cart){
+        cart.forEach(item => this.addCartItem(item));
+        
+    }
+
+    hideCart(){
+        cartOverlay.classList.remove("transparentBcg");
+        cartDom.classList.remove("show-cart");
     }
 
 }
@@ -114,11 +180,20 @@ class Storage{
         localStorage.setItem('cart', JSON.stringify(cart));
     }
 
+    static getCart(){
+        return localStorage.getItem('cart') ? 
+        JSON.parse(localStorage.getItem('cart'))
+        :[];
+    }
+
 }
 
 document.addEventListener("DOMContentLoaded", () =>{
     const ui = new UI();
     const products = new Products();
+
+    //setup app
+    ui.setupApp()
 
     //get all products
     products.getProducts().then(Products => {
