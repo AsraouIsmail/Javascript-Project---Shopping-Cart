@@ -18,7 +18,7 @@ let buttonsDom = [];
 class Products {
     async getProducts(){
      try {
-         let result = await fetch('products.json')
+         let result = await fetch('products.json');
          let data = await result.json();
         let products = data.items;
         products = products.map(item =>{
@@ -41,10 +41,9 @@ class Products {
 //display products
 class UI{
     displayProducts(products){
-        let result = '';
+        let result = "";
         products.forEach(product => {
             result += `
-             <!--single product-->
             <article class="product">
                 <div class="img-container">
                     <img class="product-img" src=${product.image}>
@@ -56,7 +55,6 @@ class UI{
                 <h3>${product.title}</h3>
                 <h4>${product.price}</h4>
             </article>
-            <!--end of single product-->
             `;
         });
 
@@ -114,8 +112,8 @@ class UI{
 
     addCartItem(item){
        const div = document.createElement('div');
-       div.classList.add('.cart-item');
-       div.innerHTML = `<!-- cart item -->
+       div.classList.add('cart-item');
+       div.innerHTML = `
             <!-- item image -->
             <img src=${item.image} alt="product" />
             <!-- item info -->
@@ -132,7 +130,6 @@ class UI{
               </p>
                 <i class="fas fa-chevron-down" data-id=${item.id}></i>
             </div>
-          <!-- cart item -->
        `;
        cartContent.append(div);
 
@@ -162,7 +159,48 @@ class UI{
         cartDom.classList.remove("show-cart");
     }
 
-}
+    cartLogic(){
+        ClearCartBtn.addEventListener('click', () =>{
+            this.clearCart();
+        });
+    }
+
+
+    clearCart(){
+        let cartItems = cart.map(item => item.id);
+        cartItems.forEach(id => this.removeItem(id));
+
+        console.log(cartContent.children);
+        while(cartContent.children.length > 0){
+            cartContent.removeChild(cartContent.children[0]);
+        }
+
+        this.hideCart();
+
+    }
+
+
+
+        removeItem(id){
+        cart = cart.filter(item => item.id !== id);
+        this.setCartValues(cart);
+        Storage.saveCart(cart);
+        let button = this.getSingleButton(id);
+        button.disabled = false;
+        button.innerHTML = button.innerHTML = `<i class="fas fa-shopping-cart"></i>add to bag`;
+    }
+
+    getSingleButton(id){
+        return buttonsDom.find(button => button.dataset.id === id);
+    }
+
+    }
+
+   /*end of class UI*/ 
+
+
+    
+
 
 //local Storage
 class Storage{
@@ -202,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () =>{
 })
 .then(() =>{
     ui.getBugButtons();
+    ui.cartLogic();
 
 });
     
